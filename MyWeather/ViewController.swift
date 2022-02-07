@@ -64,6 +64,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         let long = currentLocation.coordinate.longitude
         let lat = currentLocation.coordinate.latitude
+        print(long, lat)
 
         let url = "https://api.darksky.net/forecast/ddcc4ebb2a7c9930b90d9e59bda0ba7a/\(lat),\(long)?exclude=[flags,minutely]"
 
@@ -175,6 +176,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
 }
 
+
 struct WeatherResponse: Codable {
     let latitude: Float
     let longitude: Float
@@ -186,25 +188,24 @@ struct WeatherResponse: Codable {
 }
 
 struct CurrentWeather: Codable {
-    let time: Int
-    let summary: String
-    let icon: String
-    let nearestStormDistance: Int
-    let nearestStormBearing: Int
-    let precipIntensity: Int
-    let precipProbability: Int
-    let temperature: Double
-    let apparentTemperature: Double
-    let dewPoint: Double
-    let humidity: Double
-    let pressure: Double
-    let windSpeed: Double
-    let windGust: Double
-    let windBearing: Int
-    let cloudCover: Double
-    let uvIndex: Int
-    let visibility: Double
-    let ozone: Double
+ let time: Int
+ let summary: String
+ let icon: String
+ let precipIntensity: Float
+ let precipProbability: Double
+ let precipType: String?
+ let temperature: Double
+ let apparentTemperature: Double
+ let dewPoint: Double
+ let humidity: Double
+ let pressure: Double
+ let windSpeed: Double
+ let windGust: Double
+ let windBearing: Int
+ let cloudCover: Double
+ let uvIndex: Int
+ let visibility: Double
+ let ozone: Double
 }
 
 struct DailyWeather: Codable {
@@ -214,17 +215,125 @@ struct DailyWeather: Codable {
 }
 
 struct DailyWeatherEntry: Codable {
+ let time: Int
+ let summary, icon: String
+ let sunriseTime, sunsetTime: Int
+ let moonPhase, precipIntensity, precipIntensityMax: Double
+ let precipProbability: Double
+ let precipType: String?
+ let precipAccumulation: Double?
+ let temperatureHigh: Double
+ let temperatureHighTime: Int
+ let temperatureLow: Double
+ let temperatureLowTime: Int
+ let apparentTemperatureHigh: Double
+ let apparentTemperatureHighTime: Int
+ let apparentTemperatureLow: Double
+ let apparentTemperatureLowTime: Int
+ let dewPoint, humidity, pressure, windSpeed: Double
+ let windGust: Double
+ let windGustTime, windBearing: Int
+ let cloudCover: Double
+ let uvIndex, uvIndexTime: Int
+ let visibility, ozone, temperatureMin: Double
+ let temperatureMinTime: Int
+ let temperatureMax: Double
+ let temperatureMaxTime: Int
+ let apparentTemperatureMin: Double
+ let apparentTemperatureMinTime: Int
+ let apparentTemperatureMax: Double
+ let apparentTemperatureMaxTime: Int
+}
+
+struct HourlyWeather: Codable {
+ let summary: String
+ let icon: String
+ let data: [HourlyWeatherEntry]
+}
+
+struct HourlyWeatherEntry: Codable {
+ let time: Int
+ let summary: String
+ let icon: String
+ let precipIntensity: Float
+ let precipProbability: Double
+ let precipType: String?
+ let temperature: Double
+ let apparentTemperature: Double
+ let dewPoint: Double
+ let humidity: Double
+ let pressure: Double
+ let windSpeed: Double
+ let windGust: Double
+ let windBearing: Int
+ let cloudCover: Double
+ let uvIndex: Int
+ let visibility: Double
+ let ozone: Double
+}
+
+/*
+
+struct WeatherResponse: Codable {
+    let latitude, longitude: Double
+    let timezone: String
+    let currently: Currently
+    let hourly: Hourly
+    let daily: Daily
+    let offset: Int
+}
+
+// MARK: - Currently
+struct Currently: Codable {
     let time: Int
+    let summary: Summary
+    let icon: Icon
+    let precipIntensity, precipProbability, temperature, apparentTemperature: Double
+    let dewPoint, humidity, pressure, windSpeed: Double
+    let windGust: Double
+    let windBearing: Int
+    let cloudCover: Double
+    let uvIndex, visibility: Int
+    let ozone: Double
+    let precipType: PrecipType?
+}
+
+enum Icon: Codable {
+    case clearDay
+    case clearNight
+    case cloudy
+    case partlyCloudyDay
+    case partlyCloudyNight
+}
+
+enum PrecipType: Codable {
+    case rain
+}
+
+enum Summary: Codable {
+    case clear
+    case mostlyCloudy
+    case overcast
+    case partlyCloudy
+}
+
+// MARK: - Daily
+struct Daily: Codable {
     let summary: String
-    let icon: String
-    let sunriseTime: Int
-    let sunsetTime: Int
-    let moonPhase: Double
-    let precipIntensity: Float
-    let precipIntensityMax: Float
+    let icon: PrecipType
+    let data: [HourlyWeatherEntry]
+}
+
+// MARK: - Datum
+struct HourlyWeatherEntry: Codable {
+    let time: Int
+    let summary, icon: String
+    let sunriseTime, sunsetTime: Int
+    let moonPhase, precipIntensity, precipIntensityMax: Double
     let precipIntensityMaxTime: Int
     let precipProbability: Double
-    let precipType: String?
+    let precipType: String
+    let precipAccumulation: Double?
     let temperatureHigh: Double
     let temperatureHighTime: Int
     let temperatureLow: Double
@@ -233,19 +342,12 @@ struct DailyWeatherEntry: Codable {
     let apparentTemperatureHighTime: Int
     let apparentTemperatureLow: Double
     let apparentTemperatureLowTime: Int
-    let dewPoint: Double
-    let humidity: Double
-    let pressure: Double
-    let windSpeed: Double
+    let dewPoint, humidity, pressure, windSpeed: Double
     let windGust: Double
-    let windGustTime: Int
-    let windBearing: Int
+    let windGustTime, windBearing: Int
     let cloudCover: Double
-    let uvIndex: Int
-    let uvIndexTime: Int
-    let visibility: Double
-    let ozone: Double
-    let temperatureMin: Double
+    let uvIndex, uvIndexTime: Int
+    let visibility, ozone, temperatureMin: Double
     let temperatureMinTime: Int
     let temperatureMax: Double
     let temperatureMaxTime: Int
@@ -255,29 +357,31 @@ struct DailyWeatherEntry: Codable {
     let apparentTemperatureMaxTime: Int
 }
 
-struct HourlyWeather: Codable {
+ struct DailyWeatherEntry: Codable {
+     let time: Int
+     let summary: String
+     let icon: String
+     let precipIntensity: Float
+     let precipProbability: Double
+     let precipType: String?
+     let temperature: Double
+     let apparentTemperature: Double
+     let dewPoint: Double
+     let humidity: Double
+     let pressure: Double
+     let windSpeed: Double
+     let windGust: Double
+     let windBearing: Int
+     let cloudCover: Double
+     let uvIndex: Int
+     let visibility: Double
+     let ozone: Double
+ }
+ 
+// MARK: - Hourly
+struct Hourly: Codable {
     let summary: String
-    let icon: String
-    let data: [HourlyWeatherEntry]
+    let icon: Icon
+    let data: [Currently]
 }
-
-struct HourlyWeatherEntry: Codable {
-    let time: Int
-    let summary: String
-    let icon: String
-    let precipIntensity: Float
-    let precipProbability: Double
-    let precipType: String?
-    let temperature: Double
-    let apparentTemperature: Double
-    let dewPoint: Double
-    let humidity: Double
-    let pressure: Double
-    let windSpeed: Double
-    let windGust: Double
-    let windBearing: Int
-    let cloudCover: Double
-    let uvIndex: Int
-    let visibility: Double
-    let ozone: Double
-}
+*/
